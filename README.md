@@ -1,7 +1,7 @@
 # Calendar coding
 Coding exercise to create a command line tool to generate calendars in HTML
 
-## The challenge
+## The Challenge
 Write a HTML calendar generator in a programming language of your choice  
 Requirements:
   1) It should be a command line tool.
