@@ -28,10 +28,13 @@ Requirements:
 
 ## Build 
 ```bash
-
+mkdir build
+cd build
+cmake ..
+make
 ```
 
 ## Run
 ```bash
-
+./CalGen 2000 Calendar2000.html
 ```
