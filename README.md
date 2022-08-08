@@ -14,7 +14,7 @@ Requirements:
   6) Calendar shall be generated for: Year – 1, then Year and then Year + 1  
     a. i.e. if a year is 2016 then generation should happen for 2015, 2016 and 2017
   7) Calendar shall have a following format for a month:  
-    a. ![example calendar format](calendar-example.png)
+    a. ![example calendar format](example/calendar-example.png)
   8) Week days are mandatory.
   9) Week numbers are optional.
   10) The overall format of the calendar is up to you.
