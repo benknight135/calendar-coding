@@ -45,6 +45,7 @@ int dayOfWeek(int year, int month, int day){
 }
 
 std::string genHeaderHTML(){
+    // generate HTML header
     std::stringstream html;
     html << "<!DOCTYPE html>" << std::endl;
     html << "<html>" << std::endl;
@@ -53,18 +54,22 @@ std::string genHeaderHTML(){
 }
 
 std::string genMonthHTML(int year, int month){
+    // generate HTML for chosen month and year
     std::string month_names[12] = {
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
     std::string day_names[7] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
     std::string month_name = month_names[month-1];
+    // create title for month table
     std::stringstream html;
     html << "<h2 align=\"center\" style=\"color: black;\">" << std::endl;
     html << month_name << " " << std::to_string(year) << std::endl;
     html << "</h2>" << std::endl;
     html << "<br />" << std::endl;
+    // start to create month table
     html << "<table bgcolor=\"lightgrey\" align=\"center\" cellspacing=\"21\" cellpadding=\"21\">" << std::endl;
     html << "<caption align=\"top\"></caption>" << std::endl;
+    // create table header text (days of the week)
     html << "<thead>" << std::endl;
     html << "<tr>" << std::endl;
     for (int day_in_week = 1; day_in_week <= 7;  day_in_week++){
@@ -73,30 +78,36 @@ std::string genMonthHTML(int year, int month){
     html << "</tr>" << std::endl;
     html << "</thead>" << std::endl;
     html << "<tbody>" << std::endl;
+    // create empty space where the first day is not a Monday
     html << "<tr>" << std::endl;
     int first_day_in_week = dayOfWeek(year, month, 1);
     for (int day_in_week = 1; day_in_week <= first_day_in_week - 1; day_in_week++){
         html <<  "<td></td>" << std::endl;
     }
+    // fill table with calendar date
     int numDays = daysInMonth(year, month);
     int final_day_in_week;
     for (int day_in_month = 1; day_in_month <= numDays; day_in_month++){
         int day_in_week = dayOfWeek(year, month, day_in_month);
+        // Monday (1st day) will be start of new row
         if (day_in_week == 1){
             html << "<tr>" << std::endl;
         }
         html << "<td>" << std::to_string(day_in_month) << "</td>" << std::endl;
+        // Sunday (7th day) will be end of the row
         if (day_in_week == 7){
             html << "</tr>" << std::endl;
         }
         final_day_in_week = day_in_week;
     }
+    // add spaces if last day of the week is not a Sunday
     if (final_day_in_week < 7){
         for (int day_in_week = final_day_in_week; day_in_week < 7; day_in_week++){
             html << "<td></td>" << std::endl;
         }
         html << "</tr>" << std::endl;
     }
+    // end month table
     html << "</tbody>" << std::endl;
     html << "</table>" << std::endl;
     return html.str();
@@ -137,13 +148,17 @@ int exportHTML(std::string html_data, std::string filepath){
     myfile.open(filepath);
     myfile << html_data;
     myfile.close();
+    // check write was successfuly
+    if(!myfile){
+        return 1;
+    }
     return 0;
 }
 
 int main(int argc,char* argv[]){
     // Generates HTML calendar for year provided and years either side.
     // e.g. 2000 would generate 1999, 2000, and 2001.
-    // Inputs:
+    // Arguments:
     //      year (int)
     //      filepath (string)
 
@@ -162,10 +177,12 @@ int main(int argc,char* argv[]){
     try {
         std::size_t pos;
         year = std::stoi(year_str, &pos);
+        // check for tailing characters in number
         if (pos < year_str.size()) {
             std::cerr << "Trailing characters after number: " << year_str << std::endl;
             return 1;
         }
+        // check year is after 1582
         if (year < 1582){
             std::cerr << "Year must be greater than 1582: " << year_str << std::endl;
             return 1;
@@ -178,7 +195,9 @@ int main(int argc,char* argv[]){
         return 1;
     }
 
+    // generate html
     std::string calendar_html = genCalendarHTML(year);
+    // export html to file
     int ret = exportHTML(calendar_html, filepath);
     if (ret == 0){
         std::cout << "File saved to: " << filepath << std::endl;
