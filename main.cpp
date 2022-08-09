@@ -1,14 +1,14 @@
 #include <iostream>
 #include <fstream>
-#include <vector>
 #include <math.h> /* floor */
+#include <sstream>
 
 bool isLeapYear(int year){
     // year number must be divisible by four
     // except for end-of-century years, which must be divisible by 400
-    if (year%4 == 0) return true;
-    if (year%100 == 0) return false;
-    if (year%400 == 0) return true;
+    if (year % 4 == 0) return true;
+    if (year % 100 == 0) return false;
+    if (year % 400 == 0) return true;
     return false;
 }
 
@@ -44,55 +44,108 @@ int dayOfWeek(int year, int month, int day){
     return day_indices[day_code];
 }
 
-std::string generateCal(int year){   
-    std::cout << year << std::endl;
-    std::string day_names[7] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
-    for (int month = 1; month <= 12;  month++){
-        for (int day_in_week = 1; day_in_week <= 7;  day_in_week++){
-            std::cout << day_names[day_in_week - 1] << " ";
-        }
-        std::cout << std::endl;
-        int first_day_in_week = dayOfWeek(year, month, 1);
-        for (int day_in_week = 1; day_in_week <= first_day_in_week - 1; day_in_week++){
-            std::cout << "[  ]";
-        }
-        int numDays = daysInMonth(year, month);
-        for (int day_in_month = 1; day_in_month < numDays; day_in_month++){
-            int day_in_week = dayOfWeek(year, month, day_in_month);
-            if (day_in_month < 10){
-                std::cout << "[0" << day_in_month << "]";
-            } else {
-                std::cout << "[" << day_in_month << "]";
-            }
-            if (day_in_week == 7){
-                std::cout << std::endl;
-            }
-        }
-        std::cout << std::endl;
-    }
-    std::cout << std::endl;
-
-    // TODO format in HTML string
-    std::string html_data;
-    return html_data;
+std::string genHeaderHTML(){
+    std::stringstream html;
+    html << "<!DOCTYPE html>" << std::endl;
+    html << "<html>" << std::endl;
+    html << "<body>" << std::endl;
+    return html.str();
 }
 
-int exportCal(std::vector<std::string> year_data, std::string filepath){
-    // export calendar data to html file
-    std::string test_data = "";
+std::string genMonthHTML(int year, int month){
+    std::string month_names[12] = {
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+        "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+    std::string day_names[7] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+    std::string month_name = month_names[month-1];
+    std::stringstream html;
+    html << "<h2 align=\"center\" style=\"color: black;\">" << std::endl;
+    html << month_name << " " << std::to_string(year) << std::endl;
+    html << "</h2>" << std::endl;
+    html << "<br />" << std::endl;
+    html << "<table bgcolor=\"lightgrey\" align=\"center\" cellspacing=\"21\" cellpadding=\"21\">" << std::endl;
+    html << "<caption align=\"top\"></caption>" << std::endl;
+    html << "<thead>" << std::endl;
+    html << "<tr>" << std::endl;
+    for (int day_in_week = 1; day_in_week <= 7;  day_in_week++){
+        html << "<th>" << day_names[day_in_week - 1] + "</th>" << std::endl;
+    }
+    html << "</tr>" << std::endl;
+    html << "</thead>" << std::endl;
+    html << "<tbody>" << std::endl;
+    html << "<tr>" << std::endl;
+    int first_day_in_week = dayOfWeek(year, month, 1);
+    for (int day_in_week = 1; day_in_week <= first_day_in_week - 1; day_in_week++){
+        html <<  "<td></td>" << std::endl;
+    }
+    int numDays = daysInMonth(year, month);
+    int final_day_in_week;
+    for (int day_in_month = 1; day_in_month <= numDays; day_in_month++){
+        int day_in_week = dayOfWeek(year, month, day_in_month);
+        if (day_in_week == 1){
+            html << "<tr>" << std::endl;
+        }
+        html << "<td>" << std::to_string(day_in_month) << "</td>" << std::endl;
+        if (day_in_week == 7){
+            html << "</tr>" << std::endl;
+        }
+        final_day_in_week = day_in_week;
+    }
+    if (final_day_in_week < 7){
+        for (int day_in_week = final_day_in_week; day_in_week < 7; day_in_week++){
+            html << "<td></td>" << std::endl;
+        }
+        html << "</tr>" << std::endl;
+    }
+    html << "</tbody>" << std::endl;
+    html << "</table>" << std::endl;
+    return html.str();
+}
+
+std::string genFooterHTML(){
+    // generate HTML footer
+    std::stringstream html;
+    html << "</body>" << std::endl;
+    html << "</html>" << std::endl;
+    return html.str();
+}
+
+std::string genYearHTML(int year){
+    // generate HTML for months in a year
+    std::string html;
+    for (int month = 1; month <= 12; month++){
+        html += genMonthHTML(year, month);
+    }
+    return html;
+}
+
+std::string genCalendarHTML(int middle_year){
+    // generate calendar html for year provided and year either side
+    // e.g. 2000 would generate 1999, 2000, and 2001.
+    std::string html;
+    html = genHeaderHTML();
+    for (int year = middle_year-1; year <= middle_year+1; year++){
+        html += genYearHTML(year);
+    }
+    html += genFooterHTML();
+    return html;
+}
+
+int exportHTML(std::string html_data, std::string filepath){
+    // export html data to file
     std::ofstream myfile;
     myfile.open(filepath);
-    myfile << test_data;
+    myfile << html_data;
     myfile.close();
     return 0;
 }
 
 int main(int argc,char* argv[]){
+    // Generates HTML calendar for year provided and years either side.
+    // e.g. 2000 would generate 1999, 2000, and 2001.
     // Inputs:
     //      year (int)
     //      filepath (string)
-    // Outputs:
-    //      HTML file
 
     // Check valid number of arguments provided
     if(argc!=3){
@@ -125,12 +178,8 @@ int main(int argc,char* argv[]){
         return 1;
     }
 
-    std::vector<std::string> years_data;
-    for (int i = year-1; i <= year+1; i++){
-        years_data.push_back(generateCal(i));
-    }
-
-    int ret = exportCal(years_data, filepath);
+    std::string calendar_html = genCalendarHTML(year);
+    int ret = exportHTML(calendar_html, filepath);
     if (ret == 0){
         std::cout << "File saved to: " << filepath << std::endl;
     } else {
