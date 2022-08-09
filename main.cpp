@@ -1,7 +1,7 @@
-#include <iostream>
-#include <fstream>
+#include <iostream> /* cout, cerr, endl */
+#include <fstream> /* ofstream */
 #include <math.h> /* floor */
-#include <sstream>
+#include <sstream> /* stringstream */
 
 bool isLeapYear(int year){
     // year number must be divisible by four
