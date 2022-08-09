@@ -1,0 +1,9 @@
+tasks:
+  - init: |
+      mkdir build
+      cd ${GITPOD_REPO_ROOT}/build
+      cmake ..
+      make
+    command:
+      cd ${GITPOD_REPO_ROOT}/build
+      ./CalGen 2000 Calendar2000.html
