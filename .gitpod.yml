@@ -4,6 +4,6 @@ tasks:
       cd ${GITPOD_REPO_ROOT}/build
       cmake ..
       make
-    command:
+    command: |
       cd ${GITPOD_REPO_ROOT}/build
       ./CalGen 2000 Calendar2000.html
