@@ -4,11 +4,9 @@
 #include <sstream> /* stringstream */
 
 bool isLeapYear(int year){
-    // year number must be divisible by four
-    // except for end-of-century years, which must be divisible by 400
-    if (year % 4 == 0) return true;
-    if (year % 100 == 0) return false;
-    if (year % 400 == 0) return true;
+    // leap year when year is divisble by 4 except for end-of-century years, which must be divisible by 400
+    if ((year % 4 == 0 && year % 100 != 0) || year % 400 == 0)
+        return true;
     return false;
 }
 
@@ -57,8 +55,6 @@ int weekNumber(int day, int month, int year){
     // account for first week in Jan being after Thursday
     int first_day_in_week = dayOfWeek(year, 1, 1);
     int days_in_first_week = 7 - (first_day_in_week - 1);
-    std::cout << first_day_in_week << std::endl;
-    std::cout << days_in_first_week << std::endl;
     skip_first_week = (days_in_first_week < 4);
     if (skip_first_week && day <= days_in_first_week && month == 1){
         // week number is last week of previous year
@@ -251,8 +247,6 @@ int main(int argc,char* argv[]){
         std::cerr << "Failed to save file to: " << filepath << std::endl;
         return 1;
     }
-
-    std::cout << weekNumber(1, 1, 2023) << std::endl;
 
     return 0;
 }
