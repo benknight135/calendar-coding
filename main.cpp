@@ -44,6 +44,47 @@ int dayOfWeek(int year, int month, int day){
     return day_indices[day_code];
 }
 
+int weekNumber(int day, int month, int year){
+    // ISO-8601
+    // 2.2.10 calendar week number
+    // Ordinal number which identifies a calendar week within its calendar year
+    // according to the rule that the first calendar week of a year is that one
+    // which includes the first Thursday of that year and that the last calendar
+    // week of a calendar year is the week immediately preceding the first calendar
+    // week of the next calendar year
+
+    bool skip_first_week = false;
+    // account for first week in Jan being after Thursday
+    int first_day_in_week = dayOfWeek(year, 1, 1);
+    int days_in_first_week = 7 - (first_day_in_week - 1);
+    std::cout << first_day_in_week << std::endl;
+    std::cout << days_in_first_week << std::endl;
+    skip_first_week = (days_in_first_week < 4);
+    if (skip_first_week && day <= days_in_first_week && month == 1){
+        // week number is last week of previous year
+        return weekNumber(31, 12, year-1);
+    }
+    int week_number = 1;
+    if (skip_first_week){
+        // start counting from 0 so that 1 is the first week
+        // when the first week was numbered from the previous year
+        week_number = 0;
+    }
+    for (int m = 1; m <= month; m++){
+        int month_days = daysInMonth(year, m);
+        if (m == month)
+            month_days = day;
+        for (int day_in_month = 1; day_in_month <= month_days; day_in_month++){
+            int day_in_week = dayOfWeek(year, m, day_in_month);
+            if (day_in_week == 7){
+                // increase week number at end of week
+                week_number++;
+            }
+        }
+    }
+    return week_number;
+}
+
 std::string genHeaderHTML(){
     // generate HTML header
     std::stringstream html;
@@ -58,7 +99,7 @@ std::string genMonthHTML(int year, int month){
     std::string month_names[12] = {
         "Jan", "Feb", "Mar", "Apr", "May", "Jun",
         "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
-    std::string day_names[7] = {"Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
+    std::string month_header[8] = {"Wk", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"};
     std::string month_name = month_names[month-1];
     // create title for month table
     std::stringstream html;
@@ -68,29 +109,35 @@ std::string genMonthHTML(int year, int month){
     // start to create month table
     html << "    <table bgcolor=\"lightgrey\" align=\"center\" cellspacing=\"21\" cellpadding=\"21\">" << std::endl;
     html << "    <caption align=\"top\"></caption>" << std::endl;
-    // create table header text (days of the week)
+    // create table header text (days of the week and week number)
     html << "    <thead>" << std::endl;
     html << "      <tr>" << std::endl;
-    for (int day_in_week = 1; day_in_week <= 7;  day_in_week++){
-        html << "        <th>" << day_names[day_in_week - 1] + "</th>" << std::endl;
+    for (int h = 0; h <= 7;  h++){
+        html << "        <th>" << month_header[h] + "</th>" << std::endl;
     }
     html << "      </tr>" << std::endl;
     html << "    </thead>" << std::endl;
     html << "    <tbody>" << std::endl;
-    // create empty space where the first day is not a Monday
     html << "      <tr>" << std::endl;
+    // create empty space where the first day is not a Monday
     int first_day_in_week = dayOfWeek(year, month, 1);
-    for (int day_in_week = 1; day_in_week <= first_day_in_week - 1; day_in_week++){
-        html <<  "        <td></td>" << std::endl;
+    if (first_day_in_week != 1){
+        int week_number = weekNumber(1, month, year);
+        html << "        <td>" << week_number << "</td>" << std::endl;
+        for (int day_in_week = 1; day_in_week <= first_day_in_week - 1; day_in_week++){
+            html <<  "        <td></td>" << std::endl;
+        }
     }
     // fill table with calendar date
-    int numDays = daysInMonth(year, month);
+    int month_days = daysInMonth(year, month);
     int final_day_in_week;
-    for (int day_in_month = 1; day_in_month <= numDays; day_in_month++){
+    for (int day_in_month = 1; day_in_month <= month_days; day_in_month++){
         int day_in_week = dayOfWeek(year, month, day_in_month);
         // Monday (1st day) will be start of new row
         if (day_in_week == 1){
             html << "      <tr>" << std::endl;
+            int week_number = weekNumber(day_in_month, month, year);
+            html << "        <td>" << std::to_string(week_number) << "</td>" << std::endl;
         }
         html << "        <td>" << std::to_string(day_in_month) << "</td>" << std::endl;
         // Sunday (7th day) will be end of the row
@@ -204,6 +251,8 @@ int main(int argc,char* argv[]){
         std::cerr << "Failed to save file to: " << filepath << std::endl;
         return 1;
     }
+
+    std::cout << weekNumber(1, 1, 2023) << std::endl;
 
     return 0;
 }
